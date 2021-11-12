@@ -5,8 +5,9 @@ In this tutorial, you learn how to:
 - Create a web API project.
 - Add a model class and a database context.
 - Scaffold a controller
-- Configure routing, URL paths, and return values.
 - Call the web API with Swagger.
+
+![Architecture](./images/architecture.png)
 
 At the end, you have a web API that can manage "to-do" items stored in a database.
 
@@ -22,14 +23,17 @@ Press Ctrl+F5 to run without the debugger.
 
 Visual Studio displays the following dialog
 when a project is not yet configured to use SSL:
+
 ![trustCert](./images/trustcert.png)
 
 Select **Yes** if you trust the IIS Express SSL certificate.
 
 The following dialog is displayed:
+
 ![cert](./images/cert.png)
 
-![Architecture](./images/architecture.png)
+
+
 
 Select **Yes** if you agree to trust the development certificate.
 
@@ -168,8 +172,8 @@ Right-click the project and select **Edit Project File**.
 ```xml
 
     <ItemGroup>
-  <Protobuf Include="Protos\order.proto" GrpcServices="Client" />
-</ItemGroup>
+       <Protobuf Include="Protos\order.proto" GrpcServices="Client" />
+    </ItemGroup>
 ```
 
 ## Create the Orders client
