@@ -7,7 +7,7 @@ In this tutorial, you learn how to:
 - Scaffold a controller
 - Call the web API with Swagger.
 
-![Architecture](./images/architecture.png)
+![Architecture](./images/architecturegrpc.png)
 
 At the end, you have a web API that can manage "to-do" items stored in a database.
 
