@@ -159,8 +159,8 @@ Next we will add the gRPC Client to process the order
 
 ```
         dotnet add ApiGateway.csproj package Grpc.Net.Client
-dotnet add ApiGateway.csproj package Google.Protobuf
-dotnet add ApiGateway.csproj package Grpc.Tools
+        dotnet add ApiGateway.csproj package Google.Protobuf
+        dotnet add ApiGateway.csproj package Grpc.Tools
 ```
 
 - Edit the ApiGateway.csproj project file:
