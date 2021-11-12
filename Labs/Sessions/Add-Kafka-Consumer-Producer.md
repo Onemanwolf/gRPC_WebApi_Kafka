@@ -225,7 +225,7 @@ services:
 
 ```
 
-* **Note**: if you have issue with the ports for the proxy change the ports in the yaml to 8085 from 8082 for example
+- **Note**: if you have issue with the ports for the proxy change the ports in the yaml to 8085 from 8082 for example
 
 Run the Docker Compose-up command
 
@@ -234,6 +234,24 @@ Run the Docker Compose-up command
 docker-compose up -d
 
 ```
+
+## Create a topic in the Kafka cluster
+
+```
+http://localhost:9021/clusters
+```
+
+Click Topic Cluster Home page
+
+![createatopic](./images/createtopic.png)
+
+Click Topic from the menu on the left.
+
+![createtopicmenuitem](./images/selecttopicmenuitem.png)
+
+Click `+ Add a topic` in the top right hand side of the page.
+
+![createtopic](./images/clickaddtopicplus.png)
 
 ## .NET Client Installation
 
