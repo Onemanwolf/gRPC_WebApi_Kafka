@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option csharp_namespace = "ApiGateway";
+
+package orderPackage;
+
+service orderPackage {
+    rpc CreateOrder(Order) returns (StatusMessage);
+}
+
+message Order {
+    int64 customerId = 1;
+    int64 orderId = 2;
+    int64 paymentId = 3;
+    double total = 4;
+    repeated string orderItems = 5;
+}
+
+message StatusMessage {
+    string message = 1;
+    bool orderReceived = 2;
+}
