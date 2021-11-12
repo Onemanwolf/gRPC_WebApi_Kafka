@@ -92,9 +92,8 @@ JSON similar to the following example is returned:
 
 ```
 
-## Update the launchUrl
 
-In Properties\launchSettings.json, update `launchUrl` from `"swagger"` to `"api/todoitems"`:
+I
 
 ## Add a model class
 
@@ -246,6 +245,9 @@ The Orders client is created by:
 
 Instantiating a GrpcChannel containing the information for creating the connection to the gRPC service.
 Using the GrpcChannel to construct the Greeter client:
+
+
+## Update the launchUrl
 
 We need to update the launchSettings.json to avoid port conflict when running the api and the Grpc Server together on or local dev environment.
 
