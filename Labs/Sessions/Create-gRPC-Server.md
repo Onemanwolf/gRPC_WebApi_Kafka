@@ -177,9 +177,22 @@ namespace GrpcOrder.Service.Infrastructure
 
 ```
 
+Add the MessagingService to the Startup.cs file configureServices method.
+
+```C#
+public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddGrpc();
+            services.AddSingleton<MessageService>();
+        }
+
+```
+
 Build and Debug the app.
 
-## Add Kafka Producer to the MessageService
+Note: Complete the following steps after you have [configured you Kafka Cluster using the Docker compose commands](https://github.com/Onemanwolf/gRPC_WebApi_Kafka/blob/main/Labs/Sessions/Add-Kafka-Consumer-Producer.md).
+
+## Add Kafka Producer to the MessageService ** FOLLOWING STEPS REQUIRE KAFKA CLUSTER CONFIGURATION **
 
 Install Nuget packages:
 
@@ -189,8 +202,6 @@ PM> Install-Package Confluent.Kafka
 PM> Install-Package Newtonsoft.Json -Version 13.0.1
 
 ```
-
-
 
 Relace the code in the MessageService.cs with the following code.
 
