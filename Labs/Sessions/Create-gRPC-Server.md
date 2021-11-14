@@ -111,7 +111,7 @@ namespace GrpcOrder.Service.Services
     {
 
         private readonly ILogger<OrderService> _logger;
-        private readonly MessageService _messageService;
+        private MessageService _messageService;
 
         public OrderService(ILogger<OrderService> logger, MessageService messageService)
         {
@@ -119,37 +119,23 @@ namespace GrpcOrder.Service.Services
             _messageService = messageService;
         }
 
-        public override Task<StatusMessage> CreateOrder(Order request, ServerCallContext context)
+        public override  Task<StatusMessage> CreateOrder(Order request, ServerCallContext context)
         {
+
+            var orderCreatedEventMessage = $"Order Creted: {request.OrderId} Payment Account ID: {request.PaymentId}";
+            _messageService.SendOrderCreatedEvent(orderCreatedEventMessage);
             return Task.FromResult(new StatusMessage
             {
                 Message = "Order Created: " + request.OrderId + request.PaymentId
-            });
 
 
-            if (request != null)
-            {
-                var orderCreatedEventMessage = $"Order Creted: {request.OrderId} Payment Account ID: {request.PaymentId}";
-                _messageService.SendOrderCreatedEvent(orderCreatedEventMessage);
-
-            }
+        });
 
         }
 
 
-
-
-
-
     }
 }
-
-
-
-
-
-
-
 
 ```
 
@@ -192,3 +178,77 @@ namespace GrpcOrder.Service.Infrastructure
 ```
 
 Build and Debug the app.
+
+## Add Kafka Producer to the MessageService
+
+Install Nuget packages:
+
+```
+
+PM> Install-Package Confluent.Kafka
+PM> Install-Package Newtonsoft.Json -Version 13.0.1
+
+```
+
+
+
+Relace the code in the MessageService.cs with the following code.
+
+```C#
+
+ public static int _numProduced = 0;
+
+        public void SendOrderCreatedEvent(string order)
+        {
+            var topic = "orders";
+
+            var config = new ProducerConfig
+            {
+                BootstrapServers = "localhost:9092",
+                ClientId = Dns.GetHostName(),
+
+            };
+            Produce(topic, config, order);
+
+            Console.WriteLine(order);
+
+        }
+
+        public static void Produce(string topic, ClientConfig config, string order)
+        {
+
+            // Create the producer
+            using (var producer = new ProducerBuilder<string, string>(config).Build())
+            {
+
+
+                    var key = $"order-messagenum-{_numProduced}";
+
+
+                    Console.WriteLine($"Producing record: {key} {order}");
+
+
+                    // Produce record directly to the topic
+                    producer.Produce(topic, new Message<string, string> { Key = key, Value = order },
+                        (deliveryReport) =>
+                        {
+                            if (deliveryReport.Error.Code != ErrorCode.NoError)
+                            {
+                                Console.WriteLine($"Failed to deliver message: {deliveryReport.Error.Reason}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Produced message to: {deliveryReport.TopicPartitionOffset}");
+                                _numProduced += 1;
+                            }
+                        });
+
+                // Flush the producer to make sure all messages have been written
+                producer.Flush(TimeSpan.FromSeconds(10));
+
+                Console.WriteLine($"{_numProduced} messages were produced to topic {topic}");
+            }
+        }
+
+
+```

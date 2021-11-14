@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ApiGateway.Models;
 using Grpc.Net.Client;
-
+using Newtonsoft.Json;
+using ApiGateway.Models;
 
 namespace ApiGateway.Controllers
 {
@@ -29,16 +27,25 @@ namespace ApiGateway.Controllers
             /// calls Grpc Service to create order
             ///
             ///
+        var orderRequest = JsonConvert.DeserializeObject<OrderRequest>(order.ToString());
+
+
+
+
          using var channel = GrpcChannel.ForAddress("https://localhost:5001");
          var client = new orderPackage.orderPackageClient(channel);
 
 
         var orders = new Order();
-        orders.OrderId = 1;
-        orders.CustomerId = 1;
-        orders.PaymentId = 1;
-        orders.OrderItems.Add(new [] {"{productId = 1, price = 3.44}","{productId = 2, price = 5.44}"});
-        orders.Total = 0;
+        orders.OrderId = orderRequest.OrderId;
+        orders.CustomerId = orderRequest.CustomerId;
+        orders.PaymentId = orderRequest.PaymentId;
+        foreach(var item in orderRequest.orderItems)
+        {
+          orders.OrderItems.Add(item.ToString());
+        }
+        //orders.OrderItems.Add(new [] {"{productId = 1, price = 3.44}","{productId = 2, price = 5.44}"});
+        orders.Total = orderRequest.Total;
 
 
         var reply = await client.CreateOrderAsync(

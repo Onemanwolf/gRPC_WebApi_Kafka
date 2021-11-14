@@ -10,7 +10,7 @@ public class OrderRequest {
     public int  OrderId {get; set;}
     public int PaymentId {get; set;}
     public double Total {get; set;}
-    public List<string> orderItems {get; set;}
+    public List<object> orderItems {get; set;}
 
 
 

@@ -257,11 +257,12 @@ Click `+ Add a topic` in the top right hand side of the page.
 
 confluent-kafka-dotnet is made available via NuGet. It’s a binding to the C client librdkafka, which is provided automatically via the dependent librdkafka.redist package for a number of popular platforms (win-x64, win-x86, debian-x64, rhel-x64 and osx).
 
-To reference confluent-kafka-dotnet from within a Visual Studio project, run the following command in the Package Manager Console:
+To reference confluent-kafka-dotnet and Newtonsoft.Json from within a Visual Studio project, run the following command in the Package Manager Console:
 
 ```
 
 PM> Install-Package Confluent.Kafka
+PM> Install-Package Newtonsoft.Json -Version 13.0.1
 
 ```
 
@@ -271,40 +272,173 @@ To create a .NET Producer, first construct an instance of the strongly typed Pro
 
 Add this code to your MessageService.cs in the OrderServic project
 
-```
+```C#
 
 using Confluent.Kafka;
+using System;
 using System.Net;
 
-...
-
-var config = new ProducerConfig
+namespace GrpcOrder.Service.Infrastructure
 {
-BootstrapServers = "host1:9092,host2:9092",
-ClientId = Dns.GetHostName(),
-...
-};
+    public class MessageService
+    {
 
-using (var producer = new ProducerBuilder<Null, string>(config).Build())
-{
-...
+
+        public static int _numProduced = 0;
+
+        public void SendOrderCreatedEvent(string order)
+        {
+            var topic = "orders";
+
+            var config = new ProducerConfig
+            {
+                BootstrapServers = "localhost:9092",
+                ClientId = Dns.GetHostName(),
+
+            };
+            Produce(topic, config, order);
+
+            Console.WriteLine(order);
+
+        }
+
+        public static void Produce(string topic, ClientConfig config, string order)
+        {
+            using (var producer = new ProducerBuilder<string, string>(config).Build())
+            {
+
+
+                    var key = $"order-messagenum-{_numProduced}";
+
+
+                    Console.WriteLine($"Producing record: {key} {order}");
+
+                    producer.Produce(topic, new Message<string, string> { Key = key, Value = order },
+                        (deliveryReport) =>
+                        {
+                            if (deliveryReport.Error.Code != ErrorCode.NoError)
+                            {
+                                Console.WriteLine($"Failed to deliver message: {deliveryReport.Error.Reason}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Produced message to: {deliveryReport.TopicPartitionOffset}");
+                                _numProduced += 1;
+                            }
+                        });
+
+
+                producer.Flush(TimeSpan.FromSeconds(10));
+
+                Console.WriteLine($"{_numProduced} messages were produced to topic {topic}");
+            }
+        }
+
+
+
+    }
 }
 
-```
-
-Inside the using add the following code:
+        {
 
 ```
 
-...
+## Add a Consume to Console Application
 
-await producer.ProduceAsync("orders", new Message<Null, string> { Value="a log message" });
+Create a new project and call it PaymentService
 
-...
-
-```
+Install the following packages in the PaymentService project in the Package Manager Console:
 
 ```
+PM> Install-Package Confluent.Kafka
+PM> Install-Package Newtonsoft.Json -Version 13.0.1
+```
+
+Replace the Program.cs file with the following code:
+
+```C#
+using System;
+using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
+using Confluent.Kafka;
+using Newtonsoft.Json.Linq;
+
+namespace PaymentServic
+{
+    class Program
+    {
+        static async Task Main(string[] args) {
+            Console.WriteLine("Hello World!");
+           await CosumeOrdersForPayment();
+        }
+
+
+        //Configure the Kafka consumer and call the Consume method.
+        public static async Task CosumeOrdersForPayment()
+        {
+            var topic = "orders";
+
+            var config = new ConsumerConfig
+            {
+                BootstrapServers = "localhost:9092",
+                ClientId = Dns.GetHostName(),
+
+            };
+           await Consume(topic, config);
+
+
+
+        }
+
+
+         static async Task Consume(string topic, ClientConfig config)
+        {
+            var consumerConfig = new ConsumerConfig(config);
+            consumerConfig.GroupId = "dotnet-example-group-1";
+            consumerConfig.AutoOffsetReset = AutoOffsetReset.Latest;
+            consumerConfig.EnableAutoCommit = true;
+
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+            Console.CancelKeyPress += (_, e) => {
+                e.Cancel = true; // prevent the process from terminating.
+                cts.Cancel();
+            };
+
+            using (var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build())
+            {
+                consumer.Subscribe(topic);
+                var totalCount = 0;
+                try
+                {
+                    while (true)
+                    {
+                        var cr = consumer.Consume(cts.Token);
+                        totalCount += 1; //JObject.Parse(cr.Message.Value.ToString()).Value<int>("count");
+                        Console.WriteLine($"Consumed record with key {cr.Message.Key} and value {cr.Message.Value}, and updated total count to {totalCount}");
+
+
+
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Ctrl-C was pressed.
+                }
+                finally
+                {
+                    consumer.Close();
+                }
+            }
+        }
+    }
+
+
+
+}
+
+
 
 ```
 
