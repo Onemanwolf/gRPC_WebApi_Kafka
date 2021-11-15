@@ -7,4 +7,4 @@ build_property.PublishSingleFile =
 build_property.IncludeAllContentForSelfExtract = 
 build_property._SupportedPlatformList = Android,iOS,Linux,macOS,Windows
 build_property.RootNamespace = ApiGateway
-build_property.ProjectDir = C:\Users\tioleson\Grpc_WebApi_Kafka\Labs\WebApi\src\
+build_property.ProjectDir = c:\Users\tioleson\Grpc_WebApi_Kafka\Labs\WebApi\src\

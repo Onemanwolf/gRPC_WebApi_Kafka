@@ -9,7 +9,7 @@ In this tutorial, you learn how to:
 
 ![Architecture](./images/architecturegrpc.png)
 
-At the end, you have a web API that can manage "to-do" items stored in a database.
+At the end, you have a web API that can manage "order" items stored in a Kafka.
 
 - From the File menu, select New > Project.
 - Enter Web API in the search box.
